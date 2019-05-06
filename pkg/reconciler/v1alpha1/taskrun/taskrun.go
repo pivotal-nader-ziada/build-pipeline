@@ -160,6 +160,22 @@ func (c *Reconciler) Reconcile(ctx context.Context, key string) error {
 
 	if tr.IsDone() {
 		c.timeoutHandler.Release(tr)
+		if tr.Status.PodName != "" {
+			pod, err := c.KubeClientSet.CoreV1().Pods(tr.Namespace).Get(tr.Status.PodName, metav1.GetOptions{})
+			if err != nil {
+				return fmt.Errorf("failed to Get Pod %s for TaskRun %s due to error: %s", tr.Status.PodName, tr.Name, err)
+			}
+			for _, podVolume := range pod.Spec.Volumes {
+				if podVolume.Name == tr.GetPipelineRunPVCName() {
+					if err = c.KubeClientSet.CoreV1().PersistentVolumeClaims(tr.Namespace).Delete(podVolume.Name, &metav1.DeleteOptions{}); err != nil {
+						return fmt.Errorf("failed to delete Persistent Volume %q due to error: %s", podVolume.Name, err)
+					}
+				}
+			}
+			if err := c.KubeClientSet.CoreV1().Pods(tr.Namespace).Delete(tr.Status.PodName, &metav1.DeleteOptions{}); err != nil {
+				return fmt.Errorf("failed to delete Pod %s for TaskRun %s due to error: %s", tr.Status.PodName, tr.Name, err)
+			}
+		}
 		return nil
 	}
 

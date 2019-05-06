@@ -7,7 +7,7 @@ spec:
   type: image
   params:
   - name: url
-    value: gcr.io/christiewilson-catfactory/leeroy-app
+    value: gcr.io/pivotal-knative/leeroy-app
 ---
 # This demo modifies the cluster (deploys to it) you must use a service
 # account with permission to admin the cluster (or make your default user an admin
@@ -34,7 +34,7 @@ spec:
   type: image
   params:
   - name: url
-    value: gcr.io/christiewilson-catfactory/leeroy-web
+    value: gcr.io/pivotal-knative/leeroy-web
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource

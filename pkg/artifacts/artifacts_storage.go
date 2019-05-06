@@ -138,6 +138,9 @@ func createPVC(pr *v1alpha1.PipelineRun, c kubernetes.Interface) error {
 
 func getPVCSpec(pr *v1alpha1.PipelineRun) *corev1.PersistentVolumeClaim {
 	var pvcSizeBytes int64
+	storageClass := "local-scsi"
+	annotations := make(map[string]string)
+	annotations["volume.beta.kubernetes.io/storage-class"] = storageClass
 	// TODO(shashwathi): make this value configurable
 	pvcSizeBytes = 5 * 1024 * 1024 * 1024 // 5 GBs
 	return &corev1.PersistentVolumeClaim{
@@ -145,9 +148,11 @@ func getPVCSpec(pr *v1alpha1.PipelineRun) *corev1.PersistentVolumeClaim {
 			Namespace:       pr.Namespace,
 			Name:            getPVCName(pr),
 			OwnerReferences: pr.GetOwnerReference(),
+			Annotations:     annotations,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			AccessModes:      []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+			StorageClassName: &storageClass,
 			Resources: corev1.ResourceRequirements{
 				Requests: map[corev1.ResourceName]resource.Quantity{
 					corev1.ResourceStorage: *resource.NewQuantity(pvcSizeBytes, resource.BinarySI),

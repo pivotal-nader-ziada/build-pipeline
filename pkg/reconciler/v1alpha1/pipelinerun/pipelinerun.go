@@ -179,6 +179,9 @@ func (c *Reconciler) Reconcile(ctx context.Context, key string) error {
 			c.Logger.Errorf("Failed to update TaskRun status for PipelineRun %s: %v", pr.Name, err)
 			return err
 		}
+		// if err = c.KubeClientSet.CoreV1().PersistentVolumeClaims(pr.Namespace).Delete(fmt.Sprintf("%s-pvc", pr.Name), &metav1.DeleteOptions{}); err != nil {
+		// 	return fmt.Errorf("failed to delete Persistent Volume Claim %q due to error: %s", pr.Name, err)
+		// }
 	} else {
 		if err := c.tracker.Track(pr.GetTaskRunRef(), pr); err != nil {
 			c.Logger.Errorf("Failed to create tracker for TaskRuns for PipelineRun %s: %v", pr.Name, err)
